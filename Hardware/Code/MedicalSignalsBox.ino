@@ -12,29 +12,33 @@ Developed by Walid Amriou
 const char* ssid     = "MedicalSignalsBox";         // The SSID (name) of the Wi-Fi network you want to connect to
 const char* password = "123456789msb";     // The password of the Wi-Fi network
 
-String Html_page;  
-
+int i=0;
 
 ESP8266WebServer server(80);
 
+String getPage(){
+  String page = "";
+  page += i;
+  return page;
+}
 
 void setup() {
 
-wifiacesspoint(ssid,password,Html_page);
+wifiacesspoint(ssid,password);
 
 }
 
 void loop() {
   server.handleClient();
-  Html_page="<h1>You are connected ok?</h1>";  
-  server.send(200, "text/html", Html_page);
+  i=i+1; //Just for test
+  delay(1000);
 }
 
 void handleRoot() {
-     server.send(200, "text/html", "empty");
+     server.send(200, "text/html", getPage());
 }
 
-void wifiacesspoint(const char *wifi_access_point_ssid,const char *wifi_access_point_password,String html_page_web){
+void wifiacesspoint(const char *wifi_access_point_ssid,const char *wifi_access_point_password){
   delay(1000);
   Serial.begin(115200);
   Serial.println();
