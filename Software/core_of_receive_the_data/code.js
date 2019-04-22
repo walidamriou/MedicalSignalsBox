@@ -39,7 +39,6 @@ noble.on('discover', peri => {
                    chara.read(function (error, data) {});
                       chara.on('read', function (data, isNotification) {
                         console.log('the data received: ' + data.toString('utf8')); //because the data is a buffer
-                        //console.log(String.fromCharCode(data));
                   }.bind(this));
 
                 }
