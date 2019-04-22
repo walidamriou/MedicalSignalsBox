@@ -1,5 +1,5 @@
-# MedicalSignalsBox
-##### Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
+# Medical Signals Box
+#### Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
 ### Hardware: 
 * Hardware_test:
