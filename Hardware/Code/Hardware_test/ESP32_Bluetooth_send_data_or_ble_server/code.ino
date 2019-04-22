@@ -1,12 +1,13 @@
 /*
- 
 Medical Signals Box project
 Developed by Walid Amriou
 2019 
 Test bluetooth (BLE) send data 
-
 */
 
+
+#include <sstream>
+#include <string>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
@@ -16,6 +17,17 @@ Test bluetooth (BLE) send data
 
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+//valures of data send 
+std::string body_position="unknown";
+double body_temperature=0.1;
+double HearRate=0.15;
+double SpO2=0.65;
+std::string time_record="unknown";
+
+//Just valures for operation of send ..
+std::stringstream data_send;
+std::string datasend;
 
 void setup() {
   Serial.begin(115200);
@@ -30,11 +42,17 @@ void setup() {
                                          BLECharacteristic::PROPERTY_WRITE
                                        );
 
-  pCharacteristic->setValue("walid");
+
+  data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
+  datasend = data_send.str();
+
+  pCharacteristic->setValue(datasend);
+
+
   pService->start();
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
-  Serial.println("Characteristic defined! Now you can read it in your phone!");
+  Serial.println("The data in the bluetooth channel Now");
 }
 
 void loop() {
