@@ -1,3 +1,8 @@
+/*
+Medical Signals Box project
+Developed by Walid Amriou
+2019 
+*/
 
 const noble = require('noble')
 
