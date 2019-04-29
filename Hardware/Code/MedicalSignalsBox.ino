@@ -6,7 +6,13 @@ Developed by Walid Amriou
 
 #include "SPI.h"
 #include "TFT_22_ILI9225.h"
+#include <sstream>
+#include <string>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
 
+//TFT
 #define TFT_CLK 18  // SCK
 #define TFT_SDI 23  // SDA
 #define TFT_RS  2   // RS
@@ -16,6 +22,28 @@ Developed by Walid Amriou
 
 // Use hardware SPI (faster)
 TFT_22_ILI9225 tft = TFT_22_ILI9225(TFT_RST, TFT_RS, TFT_CS, TFT_LED);
+
+//END TFT
+
+//BLE
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+//valures of data send 
+std::string body_position="unknown";
+double body_temperature=0.1;
+double HearRate=0.15;
+double SpO2=0.65;
+std::string time_record="unknown";
+
+//Just valures for operation of send ..
+std::stringstream data_send;
+std::string datasend;
+
+//END BLE
+
+
+
 
 
 //const unsigned char gImage_ic[3872] PROGMEM = {/*add image hex here*/};
@@ -1757,7 +1785,7 @@ void setup() {
   
 delay(1000);
 tft.clear();
-tft.drawBitmap(0, 0, Medical_signals_box_logo, 176, 176,COLOR_BLUE);
+tft.drawBitmap(0, 0, Medical_signals_box_logo, 176, 176,COLOR_WHITE);
 delay(2000);
 tft.clear();
 tft.drawBitmap(0, 0, Medical_signals_box_name, 176, 176,COLOR_WHITE);
@@ -1782,8 +1810,38 @@ if(digitalRead(13) == HIGH){
   tft.drawBitmap(0, 0, main_Home, 176, 176,COLOR_WHITE);
 }
 else if(digitalRead(12) == HIGH){
-    tft.clear();
+  tft.clear();
+
+  /*BLEDevice::init("MedicalSignalsBox");
+  BLEServer *pServer = BLEDevice::createServer();
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID,
+                                         BLECharacteristic::PROPERTY_READ |
+                                         BLECharacteristic::PROPERTY_WRITE
+                                       );
+
+
+  data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
+  datasend = data_send.str();
+
+  pCharacteristic->setValue(datasend);
+
+  pService->start();
+  BLEAdvertising *pAdvertising = pServer->getAdvertising();
+  pAdvertising->start();
+*/
   tft.drawBitmap(0, 0, gImage_BLE_on, 176, 176,COLOR_BLUE);
+/*
+  Serial.println("The data in the bluetooth channel for 1 min");
+  */
+  delay(10000);
+  /*
+  pAdvertising->stop();
+  pService->stop();
+  */
+  tft.clear();
+  tft.drawBitmap(0, 0, main_Home, 176, 176,COLOR_WHITE);
 }
 
 }
