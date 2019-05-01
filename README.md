@@ -9,5 +9,5 @@
 4. RTC_DS3231: set time and date, read the time and date now.
 
 ### Software: 
-1. receive the data from the hardware via bluetooth by Nodejs (code.js)
-
+1. receive the data from the hardware via bluetooth by Nodejs (software/Linux/code.js) in linux (test it in ubuntu 18.04.2)
+2. receive the data from the hardware via bluetooth by Nodejs (software/Windows/code.js) in Windows (test it in windows 10)
