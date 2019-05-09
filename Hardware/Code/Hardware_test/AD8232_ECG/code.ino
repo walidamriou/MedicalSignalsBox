@@ -23,6 +23,5 @@ void loop() {
       Serial.println(analogRead(A0));
   }
   //Wait for a bit to keep serial data from saturating
-  // 3900 because 256Hz sample rate
-  delayMicroseconds(3900);
+  delayMicroseconds(1);
 }
