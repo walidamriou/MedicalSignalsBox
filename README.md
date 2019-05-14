@@ -10,7 +10,7 @@
 5. Get the data of Heart Rate and SpO2 from MAX30102.
 6. plot the signal of ECG from AD8232 
 7. Display logo of Medical Signals box and more in the start.
-*__full building of Firemware__:
+* __full building of Firemware__:
 soon
 * __Full building of the hardware__:
 1. Circuit: Soon
