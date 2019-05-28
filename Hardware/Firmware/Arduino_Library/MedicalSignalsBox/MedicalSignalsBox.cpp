@@ -2,6 +2,8 @@
 Medical Signals Box project
 Developed by Walid Amriou
 2019 
+
+MedicalSignalsBox.h - MedicalSignalsBox library for Wiring - implementation
 */
 
 // include core Wiring API
