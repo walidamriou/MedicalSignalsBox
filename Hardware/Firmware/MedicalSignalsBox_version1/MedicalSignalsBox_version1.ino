@@ -64,7 +64,7 @@ String ECG_data_to_screen;
 
 //valures of the TFT screen 
 
-const unsigned char Medical_signals_box_logo[3872] = { /* 0X00,0X01,0XB0,0X00,0XB0,0X00, */
+const unsigned char PROGMEM Medical_signals_box_logo[3872] = { /* 0X00,0X01,0XB0,0X00,0XB0,0X00, */
 0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
 0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
 0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
@@ -6828,22 +6828,29 @@ void loop() {
       }
       else if( F == 1){
         // send the value of analog input 0:
-        for (int i = 0; i < 999; i++)
+        int y,x=10;
+        tft.clear();
+        for (int i = 0; i < 100; i++)
         {
            ECG_data_temp1[i] = analogRead(25);
            Serial.println(ECG_data_temp1[i]);
-           //ECG_data_to_screen[i] = ECG_data_temp1[i];
+           ECG_data_to_screen = String(i)+" - "+String(ECG_data_temp1[i]);
            //Wait for a bit to keep serial data from saturating
            tft.clear();
-           tft.drawText(10, 40, String(ECG_data_to_screen), COLOR_RED);
-           String thisString = String(13);
-           delayMicroseconds(5);
+           tft.setFont(Terminal6x8);
+           tft.drawText(x, y, ECG_data_to_screen);
+           y=y+10;
+           if(y==50){y=10;tft.clear();}
+           //tft.drawText(10, 10, "the data record now");
+           delayMicroseconds(10);
         }
+        
         F=0;    
         page_id(9);   
       }
       
     }
+    F=1;
     
   }  
   
@@ -6986,9 +6993,17 @@ void loop() {
   if((digitalRead(touch_1_down) == HIGH) && Page == 17 ){
     page_id(18);    
   }  
+  //From data_page2 to data_page1 
+  if((digitalRead(touch_1_down) == HIGH) && Page == 18 ){
+    page_id(17);    
+  }  
   //From data_page1 to data_page2 
   if((digitalRead(touch_2_up) == HIGH) && Page == 18 ){
     page_id(17);    
+  }  
+   //From data_page2 to data_page1
+  if((digitalRead(touch_2_up) == HIGH) && Page == 17 ){
+    page_id(18);    
   }  
   //From data_page1 to Home_page_2 
   if((digitalRead(touch_4_exit) == HIGH) && Page == 17 ){
@@ -7065,6 +7080,35 @@ void loop() {
   //From BLE1 to BLE2
   if((digitalRead(touch_3_ok) == HIGH) && Page == 22 ){
     // open BLE and put the data in the chanal
+    
+    Serial.println("Starting BLE work!");
+    BLEDevice::init("MedicalSignalsBox");
+    BLEServer *pServer = BLEDevice::createServer();
+    BLEService *pService = pServer->createService(SERVICE_UUID);
+    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+                                          CHARACTERISTIC_UUID,
+                                          BLECharacteristic::PROPERTY_READ |
+                                          BLECharacteristic::PROPERTY_WRITE
+    );
+    
+    //data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
+    data_send << "ECG" <<":";
+    //ECG from array to one string 
+    for (int i = 0; i < 100; i++)
+    {
+      data_send << ECG_data_temp1[i] << ",";
+    }
+    data_send <<";";
+    datasend = data_send.str();
+
+    pCharacteristic->setValue(datasend);
+
+
+    pService->start();
+    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    pAdvertising->start();
+    Serial.println("The data in the bluetooth channel Now");
+
     page_id(23);    
   }  
   //From BLE2 to BLE1 
