@@ -12,8 +12,8 @@
 7. Display logo of Medical Signals box and more in the start.
 8. make Hardware intarface.
 9. develop an Arduino Library to samplify the main code of the firemware. 
-* __full building of Firemware__:
-soon
+* __full building of Firemware__: the firemware writing by c++ and arduino lang<br/>
+source code of the firemware here (under development): https://github.com/walidamriou/MedicalSignalsBox/blob/master/Hardware/Firmware/MedicalSignalsBox_version1/MedicalSignalsBox_version1.ino
 * __Full building of the hardware__:
 1. Circuit: Soon
 2. PCB: Soon
