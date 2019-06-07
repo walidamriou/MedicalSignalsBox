@@ -1,11 +1,10 @@
-#include <Test.h>
+/*
+Medical Signals Box project
+Developed by Walid Amriou
+2019 
+*/
 
-// Doing Something
-// by John Doe <http://www.yourwebsite.com>
-
-// Demostrates how to do something with the Test library
-
-// Created 1 April 2006
+#include <MedicalSignalsBox.h>
 
 Test myTest = Test(2);
 

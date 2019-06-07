@@ -1,6 +1,9 @@
 /*
-  Test.h - Test library for Wiring - implementation
-  Copyright (c) 2006 John Doe.  All right reserved.
+Medical Signals Box project
+Developed by Walid Amriou
+2019 
+
+MedicalSignalsBox.h - MedicalSignalsBox library for Wiring - implementation
 */
 
 // include core Wiring API

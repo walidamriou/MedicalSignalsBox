@@ -10,6 +10,8 @@
 5. Get the data of Heart Rate and SpO2 from MAX30102.
 6. plot the signal of ECG from AD8232 
 7. Display logo of Medical Signals box and more in the start.
+8. make Hardware intarface.
+9. develop an Arduino Library to samplify the main code of the firemware. 
 * __full building of Firemware__:
 soon
 * __Full building of the hardware__:
