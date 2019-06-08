@@ -12,7 +12,51 @@ Developed by Walid Amriou
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
+#include <Wire.h>
+#include "MAX30105.h"
+#include "spo2_algorithm.h"
 
+
+///////////////////////////////////////////////////////////
+// BLE bluetooth valures         //////////////////////////
+///////////////////////////////////////////////////////////
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+//Just valures for operation of send ..
+std::stringstream data_send;
+std::string datasend;
+
+//valures of data send 
+std::string body_position="unknown";
+//double body_temperature=0.1;
+double HearRate=0.15;
+double SpO2=0.65;
+std::string time_record="unknown";
+
+///////////////////////////////////////////////////////////
+// Buttons                           //////////////////////
+///////////////////////////////////////////////////////////
+const int touch_1_down  =  13;     
+const int touch_2_up    =  12;      
+const int touch_3_ok    =  14;     
+const int touch_4_exit  =  27;     
+
+
+///////////////////////////////////////////////////////////
+// ECG                               //////////////////////
+///////////////////////////////////////////////////////////
+int ECG_data[1000];
+int ECG_data_temp1[1000];
+int ECG_data_temp2[1000];
+int F=1;
+String ECG_data_to_screen;
+
+
+///////////////////////////////////////////////////////////
+// valures of the TFT screen         //////////////////////
+///////////////////////////////////////////////////////////
+// valure for know where the Interface
+int Page = 1;
 
 //TFT
 #define TFT_CLK 18  // SCK
@@ -25,45 +69,7 @@ Developed by Walid Amriou
 // Use hardware SPI (faster)
 TFT_22_ILI9225 tft = TFT_22_ILI9225(TFT_RST, TFT_RS, TFT_CS, TFT_LED);
 
-//END TFT
-
-//BLE
-#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-
-//valures of data send 
-std::string body_position="unknown";
-double body_temperature=0.1;
-double HearRate=0.15;
-double SpO2=0.65;
-std::string time_record="unknown";
-
-//Just valures for operation of send ..
-std::stringstream data_send;
-std::string datasend;
-
-//END BLE
-
-// valure for know here the Interface
-int Page = 1;
-
-//Button
-const int touch_1_down  =  13;     
-const int touch_2_up    =  12;      
-const int touch_3_ok    =  14;     
-const int touch_4_exit  =  27;     
-
-
-//ECG valure
-int ECG_data[1000];
-int ECG_data_temp1[1000];
-int ECG_data_temp2[1000];
-int F=1;
-String ECG_data_to_screen;
-
-
-//valures of the TFT screen 
-
+//constants of images of Interfaces
 const unsigned char PROGMEM Medical_signals_box_logo[3872] = { /* 0X00,0X01,0XB0,0X00,0XB0,0X00, */
 0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
 0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
@@ -6685,7 +6691,6 @@ const unsigned char HR_save_data[3872] = { /* 0X00,0X01,0XB0,0X00,0XB0,0X00, */
 
 // Setup
 void setup() {
-  tft.begin();
   Serial.begin(9600);
   
   //Touch
@@ -6701,18 +6706,19 @@ void setup() {
   delay(1000);
   
   // Login info & logo's
+  tft.begin();
   tft.clear();
   tft.drawBitmap(0, 0, Medical_signals_box_logo, 176, 176,COLOR_WHITE);
-  delay(2000);
+  delay(1000);
   tft.clear();
   tft.drawBitmap(0, 0, Medical_signals_box_name, 176, 176,COLOR_WHITE);
-  delay(2000);
+  delay(1000);
   tft.clear();
   tft.drawBitmap(0, 0, developed_by, 176, 176,COLOR_WHITE);
-  delay(2000);
+  delay(1000);
   tft.clear();
   tft.drawBitmap(0, 0, walidamriou_logo, 176, 176,COLOR_WHITE);
-  delay(2000);
+  delay(1000);
   tft.clear();
   tft.drawBitmap(0, 0, Home_page_1, 176, 176,COLOR_WHITE);
 }
@@ -7071,7 +7077,7 @@ void loop() {
 
 
 /////////////////////////////////////////////////////////
-//BLE _ Bluetooth
+//BLE_Bluetooth
 /////////////////////////////////////////////////////////
   //From data_page2 to BLE1
   if((digitalRead(touch_3_ok) == HIGH) && Page == 18 ){
@@ -7080,19 +7086,29 @@ void loop() {
   //From BLE1 to BLE2
   if((digitalRead(touch_3_ok) == HIGH) && Page == 22 ){
     // open BLE and put the data in the chanal
-    
+    btStart();
     Serial.println("Starting BLE work!");
-    BLEDevice::init("MedicalSignalsBox");
-    BLEServer *pServer = BLEDevice::createServer();
-    BLEService *pService = pServer->createService(SERVICE_UUID);
-    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-                                          CHARACTERISTIC_UUID,
-                                          BLECharacteristic::PROPERTY_READ |
-                                          BLECharacteristic::PROPERTY_WRITE
-    );
-    
+/////////////////////////////////////// 
+//BLE
+//////////////////////////////////////
+  BLEDevice::init("MedicalSignalsBox");
+  BLEServer *pServer = BLEDevice::createServer();
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID,
+                                         BLECharacteristic::PROPERTY_READ |
+                                         BLECharacteristic::PROPERTY_WRITE
+                                       );
+
+
+  //data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
+  //datasend = data_send.str();
+
+
+    int walid=0;
+    walid=walid+1;
     //data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
-    data_send << "ECG" <<":";
+    data_send <<walid<< "ECG" <<":";
     //ECG from array to one string 
     for (int i = 0; i < 100; i++)
     {
@@ -7104,16 +7120,21 @@ void loop() {
     pCharacteristic->setValue(datasend);
 
 
-    pService->start();
-    BLEAdvertising *pAdvertising = pServer->getAdvertising();
-    pAdvertising->start();
-    Serial.println("The data in the bluetooth channel Now");
+  pService->start();
+  BLEAdvertising *pAdvertising = pServer->getAdvertising();
+  pAdvertising->start();
 
-    page_id(23);    
+
+    Serial.println("The data in the bluetooth channel Now");
+    //pService->stop();
+    //pAdvertising->stop();
+    page_id(23);   
+
   }  
   //From BLE2 to BLE1 
   if((digitalRead(touch_4_exit) == HIGH) && Page == 23 ){
     //close the BLE here
+
     page_id(22);    
   }  
   //From BLE1 to data_page2 
