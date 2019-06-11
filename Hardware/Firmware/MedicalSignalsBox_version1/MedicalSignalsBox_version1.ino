@@ -6698,7 +6698,9 @@ void setup() {
   pinMode(touch_2_up,INPUT);
   pinMode(touch_3_ok, INPUT);
   pinMode(touch_4_exit,INPUT);
-  
+  pinMode(5,OUTPUT);
+
+  digitalWrite(5,HIGH);
   //ECG
   pinMode(32, INPUT); // Setup for leads off detection LO +
   pinMode(33, INPUT); // Setup for leads off detection LO -
@@ -6862,7 +6864,7 @@ void loop() {
   
   //From ECG_on_record to ECG_save_data
   if((digitalRead(touch_3_ok) == HIGH) && Page == 8 ){
-    page_id(19);
+    page_id(9);
     // code2 Code of ECG save data to valures 
   }  
 
@@ -7145,7 +7147,13 @@ void loop() {
 
 
 }
+//////////////////////// end loop 
 
+
+
+////////////////////////////////////////////////////
+// page_id fonction to get the page intarface  /////
+////////////////////////////////////////////////////
 
 void page_id(int id_number){
   if(id_number == 1){
