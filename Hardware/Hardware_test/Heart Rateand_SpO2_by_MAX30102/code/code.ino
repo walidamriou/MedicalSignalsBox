@@ -13,15 +13,15 @@ MAX30105 particleSensor;
 
 #define MAX_BRIGHTNESS 255
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+/*#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 //Arduino Uno doesn't have enough SRAM to store 100 samples of IR led data and red led data in 32-bit format
 //To solve this problem, 16-bit MSB of the sampled data will be truncated. Samples become 16-bit data.
 uint16_t irBuffer[100]; //infrared LED sensor data
 uint16_t redBuffer[100];  //red LED sensor data
-#else
+#else*/
 uint32_t irBuffer[100]; //infrared LED sensor data
 uint32_t redBuffer[100];  //red LED sensor data
-#endif
+/*#endif*/
 
 int32_t bufferLength; //data length
 int32_t spo2; //SPO2 value
@@ -29,18 +29,13 @@ int8_t validSPO2; //indicator to show if the SPO2 calculation is valid
 int32_t heartRate; //heart rate value
 int8_t validHeartRate; //indicator to show if the heart rate calculation is valid
 
-byte pulseLED = 11; //Must be on PWM pin
-byte readLED = 13; //Blinks with each data read
-
 void setup()
 {
   Serial.begin(115200); // initialize serial communication at 115200 bits per second:
 
-  pinMode(pulseLED, OUTPUT);
-  pinMode(readLED, OUTPUT);
 
   // Initialize sensor
-  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
+  if (!particleSensor.begin(Wire, I2C_SPEED_FAST,0x57)) //Use default I2C port, 400kHz speed
   {
     Serial.println(F("MAX30105 was not found. Please check wiring/power."));
     while (1);
@@ -98,8 +93,6 @@ void loop()
     {
       while (particleSensor.available() == false) //do we have new data?
         particleSensor.check(); //Check the sensor for new data
-
-      digitalWrite(readLED, !digitalRead(readLED)); //Blink onboard LED with every data read
 
       redBuffer[i] = particleSensor.getRed();
       irBuffer[i] = particleSensor.getIR();
