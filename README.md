@@ -1,5 +1,7 @@
-# Medical Signals Box
-#### Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
+![panal with left menu](https://github.com/walidamriou/MedicalSignalsBox/blob/master/about/github_cover.png)
+
+# Medical Signals Box project source 
+#### Medical signals box is an Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
 ### Hardware: 
 * __Partial Building of Firmware (Hardware test and config)__:
