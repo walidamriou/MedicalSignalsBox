@@ -15,6 +15,41 @@ Developed by Walid Amriou
 #include <Wire.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
+#include <Wire.h>
+#include "MAX30105.h"
+#include "spo2_algorithm.h"
+
+
+///////////////////////////////////////////////////////////
+// RTC and Time of record         //////////////////////////
+///////////////////////////////////////////////////////////
+
+std::stringstream ECG_Time,SPO2_Time,HR_Time="070714062019";
+
+///////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+// MAX30105 or MAX30102         //////////////////////////
+///////////////////////////////////////////////////////////
+
+MAX30105 particleSensor;
+#define MAX_BRIGHTNESS 255
+uint32_t irBuffer[100]; //infrared LED sensor data
+uint32_t redBuffer[100];  //red LED sensor data
+int32_t bufferLength; //data length
+int32_t spo2; //SPO2 value
+int8_t validSPO2; //indicator to show if the SPO2 calculation is valid
+int32_t heartRate; //heart rate value
+int8_t validHeartRate; //indicator to show if the heart rate calculation is valid
+
+int SPO2_data[20];
+int HR_data[20];
+
+int SPO2_valure = 95;
+int HR_valure = 120;
+
+///////////////////////////////////////////////////////////
+
 
 
 ///////////////////////////////////////////////////////////
@@ -26,12 +61,9 @@ Developed by Walid Amriou
 std::stringstream data_send;
 std::string datasend;
 
-//valures of data send 
-std::string body_position="unknown";
-//double body_temperature=0.1;
-double HearRate=0.15;
-double SpO2=0.65;
-std::string time_record="unknown";
+///////////////////////////////////////////////////////////
+
+
 
 ///////////////////////////////////////////////////////////
 // Buttons                           //////////////////////
@@ -40,6 +72,9 @@ const int touch_1_down  =  13;
 const int touch_2_up    =  12;      
 const int touch_3_ok    =  14;     
 const int touch_4_exit  =  27;     
+
+///////////////////////////////////////////////////////////
+
 
 
 ///////////////////////////////////////////////////////////
@@ -50,6 +85,9 @@ int ECG_data_temp1[1000];
 int ECG_data_temp2[1000];
 int F=1;
 String ECG_data_to_screen;
+
+///////////////////////////////////////////////////////////
+
 
 
 ///////////////////////////////////////////////////////////
@@ -6902,9 +6940,99 @@ void loop() {
   if((digitalRead(touch_3_ok) == HIGH) && Page == 10 ){
     page_id(11);
     // code1 Code of SPO2 here 
+    Serial.println("Start SPO2");
+    if (!particleSensor.begin(Wire, I2C_SPEED_FAST,0x57)) //Use default I2C port, 400kHz speed
+    {
+      Serial.println(F("MAX30105 was not found. Please check wiring/power."));
+      //while (1);
+      page_id(10); 
+    }
+    else
+    {
     
+    
+    byte ledBrightness = 60; //Options: 0=Off to 255=50mA
+    byte sampleAverage = 4; //Options: 1, 2, 4, 8, 16, 32
+    byte ledMode = 2; //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
+    byte sampleRate = 100; //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
+    int pulseWidth = 411; //Options: 69, 118, 215, 411
+    int adcRange = 4096; //Options: 2048, 4096, 8192, 16384
+
+   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
+   
+    bufferLength = 100; //buffer length of 100 stores 4 seconds of samples running at 25sps
+
+    //read the first 100 samples, and determine the signal range
+    for (byte i = 0 ; i < bufferLength ; i++)
+    {
+      while (particleSensor.available() == false) //do we have new data?
+      particleSensor.check(); //Check the sensor for new data
+
+      redBuffer[i] = particleSensor.getRed();
+      irBuffer[i] = particleSensor.getIR();
+      particleSensor.nextSample(); //We're finished with this sample so move to next sample
+
+      Serial.print(F("red="));
+      Serial.print(redBuffer[i], DEC);
+      Serial.print(F(", ir="));
+      Serial.println(irBuffer[i], DEC);
+    }
+    delay(1);
+    //calculate heart rate and SpO2 after first 100 samples (first 4 seconds of samples)
+    maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+    delay(1);
+    //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 1 second
+    for(int i2;i2<10;i2++)
+    {
+      //dumping the first 25 sets of samples in the memory and shift the last 75 sets of samples to the top
+      for (byte i = 25; i < 100; i++)
+      {
+        redBuffer[i - 25] = redBuffer[i];
+        irBuffer[i - 25] = irBuffer[i];
+      }
+
+      //take 25 sets of samples before calculating the heart rate.
+      for (byte i = 75; i < 100; i++)
+      {
+        while (particleSensor.available() == false) //do we have new data?
+        particleSensor.check(); //Check the sensor for new data
+
+        redBuffer[i] = particleSensor.getRed();
+        irBuffer[i] = particleSensor.getIR();
+        particleSensor.nextSample(); //We're finished with this sample so move to next sample
+
+        //send samples and calculation result to terminal program through UART
+        //Serial.print(F("red="));
+        //Serial.print(redBuffer[i], DEC);
+        //Serial.print(F(", ir="));
+        //Serial.print(irBuffer[i], DEC);
+
+        //Serial.print(F(", HR="));
+        //Serial.print(heartRate, DEC);
+
+        //Serial.print(F(", HRvalid="));
+        //Serial.print(validHeartRate, DEC);
+
+        Serial.print(F(", SPO2="));
+        Serial.print(spo2, DEC);
+
+        Serial.print(F(", SPO2Valid="));
+        Serial.println(validSPO2, DEC);
+        if(validSPO2 == 1){
+          SPO2_data[i]=spo2;
+        }
+      }
+
+      //After gathering 25 new samples recalculate HR and SP02
+      maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+  }
+  for(int i=0;i<20;i++){
+    Serial.print(SPO2_data[i]);
+  }
+  }   
   }  
-  
+  ////////// end read SPIO2 page
+
   //From SPO2_on_record to SPO2_save_data
   if((digitalRead(touch_3_ok) == HIGH) && Page == 11 ){
     page_id(12);
@@ -6943,7 +7071,97 @@ void loop() {
   //From HR_page_home to HR_on_record 
   if((digitalRead(touch_3_ok) == HIGH) && Page == 13 ){
     page_id(14);
-    // code1 Code of SPO2 here 
+    // code1 Code of HR here
+       Serial.println("Start HR");
+    if (!particleSensor.begin(Wire, I2C_SPEED_FAST,0x57)) //Use default I2C port, 400kHz speed
+    {
+      Serial.println(F("MAX30105 was not found. Please check wiring/power."));
+      //while (1);
+      page_id(13); 
+    }
+    else
+    {
+    
+    
+    byte ledBrightness = 60; //Options: 0=Off to 255=50mA
+    byte sampleAverage = 4; //Options: 1, 2, 4, 8, 16, 32
+    byte ledMode = 2; //Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
+    byte sampleRate = 100; //Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
+    int pulseWidth = 411; //Options: 69, 118, 215, 411
+    int adcRange = 4096; //Options: 2048, 4096, 8192, 16384
+
+   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
+   
+    bufferLength = 100; //buffer length of 100 stores 4 seconds of samples running at 25sps
+
+    //read the first 100 samples, and determine the signal range
+    for (byte i = 0 ; i < bufferLength ; i++)
+    {
+      while (particleSensor.available() == false) //do we have new data?
+      particleSensor.check(); //Check the sensor for new data
+
+      redBuffer[i] = particleSensor.getRed();
+      irBuffer[i] = particleSensor.getIR();
+      particleSensor.nextSample(); //We're finished with this sample so move to next sample
+
+      Serial.print(F("red="));
+      Serial.print(redBuffer[i], DEC);
+      Serial.print(F(", ir="));
+      Serial.println(irBuffer[i], DEC);
+    }
+    delay(1);
+    //calculate heart rate and SpO2 after first 100 samples (first 4 seconds of samples)
+    maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+    delay(1);
+    //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 1 second
+    for(int i2;i2<10;i2++)
+    {
+      //dumping the first 25 sets of samples in the memory and shift the last 75 sets of samples to the top
+      for (byte i = 25; i < 100; i++)
+      {
+        redBuffer[i - 25] = redBuffer[i];
+        irBuffer[i - 25] = irBuffer[i];
+      }
+
+      //take 25 sets of samples before calculating the heart rate.
+      for (byte i = 75; i < 100; i++)
+      {
+        while (particleSensor.available() == false) //do we have new data?
+        particleSensor.check(); //Check the sensor for new data
+
+        redBuffer[i] = particleSensor.getRed();
+        irBuffer[i] = particleSensor.getIR();
+        particleSensor.nextSample(); //We're finished with this sample so move to next sample
+
+        //send samples and calculation result to terminal program through UART
+        //Serial.print(F("red="));
+        //Serial.print(redBuffer[i], DEC);
+        //Serial.print(F(", ir="));
+        //Serial.print(irBuffer[i], DEC);
+
+        Serial.print(F(", HR="));
+        Serial.print(heartRate, DEC);
+
+        Serial.print(F(", HRvalid="));
+        Serial.print(validHeartRate, DEC);
+
+        //Serial.print(F(", SPO2="));
+        //Serial.print(spo2, DEC);
+
+        //Serial.print(F(", SPO2Valid="));
+        //Serial.println(validSPO2, DEC);
+        if(validSPO2 == 1){
+          HR_data[i]=spo2;
+        }
+      }
+
+      //After gathering 25 new samples recalculate HR and SP02
+      maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+  }
+  for(int i=0;i<20;i++){
+    Serial.print(HR_data[i]);
+  }
+  }  
     
   }  
   
@@ -7102,30 +7320,70 @@ void loop() {
                                          BLECharacteristic::PROPERTY_WRITE
                                        );
 
+    //send as JSON look to be easy in the receive
 
-  //data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
-  //datasend = data_send.str();
-
-
-    int walid=0;
-    walid=walid+1;
-    //data_send << body_position << "," << body_temperature << "," << HearRate << "," << SpO2 << "," << time_record;
-    data_send <<walid<< "ECG" <<":";
+    //ECG  
+    data_send << "{";
+    data_send << "ECG" <<":";
+    data_send << "{";
     //ECG from array to one string 
     for (int i = 0; i < 100; i++)
     {
-      data_send << ECG_data_temp1[i] << ",";
+      data_send << ECG_data_temp1[i];
+      if(i<99){
+        data_send << ",";
+      }
     }
-    data_send <<";";
+    data_send << "}";
+    data_send <<",";
+
+    //ECG Time  
+    data_send << "{";
+    data_send << "ECG_Time" <<":";
+    data_send << "{";
+    data_send << ECG_Time;
+    data_send << "}";
+    data_send <<",";
+
+
+    //SPO2
+    data_send << "{";
+    data_send << "SPO2" <<":";
+    data_send << "{";
+    data_send << SPO2_valure;
+    data_send << "}";
+    data_send <<",";
+
+    //SPO2 Time  
+    data_send << "{";
+    data_send << "SPO2_Time" <<":";
+    data_send << "{";
+    data_send << SPO2_Time;
+    data_send << "}";
+    data_send <<",";
+
+    //HR   
+    data_send << "{";
+    data_send << "HR" <<":";
+    data_send << "{";
+    data_send << HR_valure;
+    data_send << "}";
+    data_send <<",";
+
+    //HR Time  
+    data_send << "{";
+    data_send << "HR_Time" <<":";
+    data_send << "{";
+    data_send << ECG_Time;
+    data_send << "}";
+    data_send <<",";
+
+
     datasend = data_send.str();
-
     pCharacteristic->setValue(datasend);
-
-
-  pService->start();
-  BLEAdvertising *pAdvertising = pServer->getAdvertising();
-  pAdvertising->start();
-
+    pService->start();
+    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    pAdvertising->start();
 
     Serial.println("The data in the bluetooth channel Now");
     //pService->stop();
@@ -7145,10 +7403,9 @@ void loop() {
   }  
 /////////////////////////////////////////////////////////
 
-
+ 
 }
 //////////////////////// end loop 
-
 
 
 ////////////////////////////////////////////////////

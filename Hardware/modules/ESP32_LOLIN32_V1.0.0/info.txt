@@ -1,1 +1,2 @@
-
+Driver here: https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers
+info here: https://wiki.wemos.cc/products:lolin32:lolin32

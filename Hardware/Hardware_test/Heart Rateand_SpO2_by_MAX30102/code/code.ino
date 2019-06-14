@@ -37,13 +37,13 @@ void setup()
   // Initialize sensor
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST,0x57)) //Use default I2C port, 400kHz speed
   {
-    Serial.println(F("MAX30105 was not found. Please check wiring/power."));
+    Serial.println(F("MAX30102 was not found. Please check wiring/power."));
     while (1);
   }
 
-  Serial.println(F("Attach sensor to finger with rubber band. Press any key to start conversion"));
-  while (Serial.available() == 0) ; //wait until user presses a key
-  Serial.read();
+  //Serial.println(F("Attach sensor to finger with rubber band. Press any key to start conversion"));
+  //while (Serial.available() == 0) ; //wait until user presses a key
+  //Serial.read();
 
   byte ledBrightness = 60; //Options: 0=Off to 255=50mA
   byte sampleAverage = 4; //Options: 1, 2, 4, 8, 16, 32
