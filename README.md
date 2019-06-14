@@ -1,3 +1,5 @@
+![panal with left menu](https://github.com/walidamriou/MedicalSignalsBox/blob/master/about/github_cover.png)
+
 # Medical Signals Box
 #### Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
