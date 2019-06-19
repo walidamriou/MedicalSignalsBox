@@ -18,14 +18,16 @@ Developed by Walid Amriou
 #include <Wire.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
+#include "DS3231.h"
 
 
 ///////////////////////////////////////////////////////////
 // RTC and Time of record         //////////////////////////
 ///////////////////////////////////////////////////////////
 
-std::stringstream ECG_Time,SPO2_Time,HR_Time="070714062019";
-
+int ECG_Time,SPO2_Time,HR_Time;
+RTClib RTC;
+const int DS3231_address=0x68; 
 ///////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////
@@ -6891,13 +6893,29 @@ void loop() {
            delayMicroseconds(10);
         }
         
-        F=0;    
+        F=0; 
+
+        Wire.begin();
+        Wire.beginTransmission(DS3231_address);
+        DateTime now = RTC.now();
+        Serial.print(now.year(), DEC);
+        Serial.print('/');
+        Serial.print(now.month(), DEC);
+        Serial.print('/');
+        Serial.print(now.day(), DEC);
+        Serial.print(' ');
+        Serial.print(now.hour(), DEC);
+        Serial.print(':');
+        Serial.print(now.minute(), DEC);
+        Serial.print(':');
+        Serial.print(now.second(), DEC);
+        Serial.println();  
         page_id(9);   
       }
       
     }
     F=1;
-    
+
   }  
   
   //From ECG_on_record to ECG_save_data
@@ -6945,6 +6963,23 @@ void loop() {
     {
       Serial.println(F("MAX30105 was not found. Please check wiring/power."));
       //while (1);
+
+    Wire.begin();
+    Wire.beginTransmission(DS3231_address);
+    DateTime now = RTC.now();
+    Serial.print(now.year(), DEC);
+    Serial.print('/');
+    Serial.print(now.month(), DEC);
+    Serial.print('/');
+    Serial.print(now.day(), DEC);
+    Serial.print(' ');
+    Serial.print(now.hour(), DEC);
+    Serial.print(':');
+    Serial.print(now.minute(), DEC);
+    Serial.print(':');
+    Serial.print(now.second(), DEC);
+    Serial.println();
+
       page_id(10); 
     }
     else
@@ -7029,7 +7064,27 @@ void loop() {
   for(int i=0;i<20;i++){
     Serial.print(SPO2_data[i]);
   }
+
+  Wire.begin();
+    Wire.beginTransmission(DS3231_address);
+    DateTime now = RTC.now();
+    Serial.print(now.year(), DEC);
+    Serial.print('/');
+    Serial.print(now.month(), DEC);
+    Serial.print('/');
+    Serial.print(now.day(), DEC);
+    Serial.print(' ');
+    Serial.print(now.hour(), DEC);
+    Serial.print(':');
+    Serial.print(now.minute(), DEC);
+    Serial.print(':');
+    Serial.print(now.second(), DEC);
+    Serial.println();
+page_id(12);
   }   
+
+
+
   }  
   ////////// end read SPIO2 page
 
