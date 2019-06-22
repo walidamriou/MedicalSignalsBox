@@ -7396,7 +7396,8 @@ page_id(12);
     data_send << "{";
     data_send << "ECG_Time" <<":";
     data_send << "{";
-    data_send << ECG_Time;
+    data_send << "70714062019";
+    //data_send << ECG_Time;
     data_send << "}";
     data_send <<",";
 
@@ -7413,7 +7414,8 @@ page_id(12);
     data_send << "{";
     data_send << "SPO2_Time" <<":";
     data_send << "{";
-    data_send << SPO2_Time;
+    data_send << "70714062019";
+    //data_send << SPO2_Time;
     data_send << "}";
     data_send <<",";
 
@@ -7429,7 +7431,8 @@ page_id(12);
     data_send << "{";
     data_send << "HR_Time" <<":";
     data_send << "{";
-    data_send << ECG_Time;
+    data_send << "70714062019";
+    //data_send << ECG_Time;
     data_send << "}";
     data_send <<",";
 
