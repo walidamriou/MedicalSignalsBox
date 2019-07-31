@@ -3,6 +3,10 @@
 # Medical Signals Box project source 
 #### Medical signals box is an Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
+------------------------------------------------------------
+* __You can see my graduation thesis to get more about this project, design, ideas, and more (my Master Degree in Electronic of Embedded Systems thesis)__: [click here](https://drive.google.com/open?id=166BeP_vbR_HBgyp62OKz9IQIrJ2khRgF)
+------------------------------------------------------------
+
 ### Hardware: 
 * __Partial Building of Firmware (Hardware test and config)__:
 1. ESP32 Bluetooth send data or ble_server.
