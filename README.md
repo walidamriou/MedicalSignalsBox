@@ -4,7 +4,10 @@
 #### Medical signals box is an Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
 ------------------------------------------------------------
-* __You can see my graduation thesis to get more about this project, design, ideas, and more (my Master Degree in Electronic of Embedded Systems thesis)__: [click here](https://drive.google.com/open?id=166BeP_vbR_HBgyp62OKz9IQIrJ2khRgF)
+* __You can see my graduation thesis to get more about this project, design, ideas, and more (my Master Degree in Electronic of Embedded Systems thesis)__:
+* [From __university of M'sila__ website](http://dspace.univ-msila.dz:8080/xmlui/handle/123456789/16122)
+* [From google drive](https://drive.google.com/open?id=166BeP_vbR_HBgyp62OKz9IQIrJ2khRgF)
+
 ------------------------------------------------------------
 
 ### Hardware: 
