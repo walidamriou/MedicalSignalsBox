@@ -23,8 +23,10 @@
 9. Develop an Arduino Library to samplify the main code of the firemware. _We focus to this part in the next prototype v2 to focus in education use of the Medical Signals Box_ 
 10. MPU-6050 accelerometer and gyroscope. 
 11. I2C scanner for get the I2C address of the module
+
 * __full building of Firemware__: the firemware writing by c++ and arduino lang<br/>
-source code of the firemware here (under development): https://github.com/walidamriou/MedicalSignalsBox/blob/master/Hardware/Firmware/MedicalSignalsBox_version1/MedicalSignalsBox_version1.ino
+source code of the firemware here (under development): https://github.com/walidamriou/MedicalSignalsBox/tree/master/Prototype_v1/Hardware/Firmware/MedicalSignalsBox_version2
+
 * __Full building of the hardware__:
 1. Circuit: Soon
 2. PCB: Soon
