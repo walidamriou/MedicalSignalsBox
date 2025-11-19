@@ -1,4 +1,4 @@
-# Medical Signals Box project source 
+# Medical Signals Box project source (for Educational Purposes)
 #### Medical signals box is an Embedded system project to collect,send and save medical data with software for receive the data in computers and smart devices.
 
 ------------------------------------------------------------
